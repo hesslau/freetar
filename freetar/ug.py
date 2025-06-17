@@ -74,6 +74,10 @@ class SongDetail:
 
     def fix_tab(self):
         tab = self.tab
+
+        # remove lines that look like a guitar tab line
+        tab = re.sub(r"[a-zA-Z]\|.*\n?", "", tab, flags=re.MULTILINE)
+
         tab = tab.replace("\r\n", "<br/>")
         tab = tab.replace("\n", "<br/>")
         tab = tab.replace(" ", "&nbsp;")
