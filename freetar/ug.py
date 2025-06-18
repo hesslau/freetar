@@ -84,12 +84,15 @@ class SongDetail:
         tab = tab.replace("[tab]", "")
         tab = tab.replace("[/tab]", "")
 
+        # create non wrappable blocks
+        tab = re.sub(r"<br/>(&nbsp;)*<br/>", "</div><div class='tab-block'>", tab)
+
         # (?P<root>[A-Ha-h](#|b)?) : Chord root is any letter A - H with an optional sharp or flat at the end
         # (?P<quality>[^[/]+)?  : Chord quality is anything after the root, but before the `/` for the base note
         # (?P<bass>/[A-Ha-h](#|b)?)? :  Chord quality is anything after the root, including parens in the case of 'm(maj7)'
         # tab = re.sub(r'\[ch\](?P<root>[A-Ga-g](#|b)?)(?P<quality>[#\w()]+)?(?P<bass>/[A-Ga-g](#|b)?)?\[\/ch\]', self.parse_chord, tab)
         tab = re.sub(r'\[ch\](?P<root>[A-Ha-h](#|b)?)(?P<quality>[^[/]+)?(?P<bass>/[A-Ha-h](#|b)?)?\[\/ch\]', self.parse_chord, tab)
-        self.tab = tab
+        self.tab = "<div class='tab-block'>" + tab + "</div>"
 
     def parse_chord(self, chord):
         root = '<span class="chord-root">%s</span>' % chord.group('root')
