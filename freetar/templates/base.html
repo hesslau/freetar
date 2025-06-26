@@ -6,7 +6,10 @@
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
 
   <meta name="description" content="freetar is an open source alternative frontend to ultimate-guitar.com. Search for your chords/tabs hosted on Ultimate Guitar. View them in a simple design. You can save them for later in your favorites without having an account." />
   <meta name="keywords" content="freetar guitar chords tabs ultimate-guitar" />
@@ -55,41 +58,41 @@
 
   <nav class="mb-2 navbar navbar-expand-lg bg-body-tertiary d-print-none">
     <div class="container d-flex" style="flex-wrap: nowrap;">
-      <a class="navbar-brand" href="/">Freetar</a>
+      <a class="navbar-brand" href="/" role="button" tabindex="0">Freetar</a>
       <form class="d-flex w-50" method="GET" action="/search">
           {% if search_term %}
-            <input required class="form-control me-2" name="search_term" type="search" value="{{ search_term }}" aria-label="Search">
+            <input required class="form-control me-2" name="search_term" type="search" value="{{ search_term }}" aria-label="Search" autocomplete="off" autocapitalize="none" autocorrect="off">
           {% else %}
-            <input required class="form-control me-2" name="search_term" type="search" placeholder="Search for chords" aria-label="Search">
+            <input required class="form-control me-2" name="search_term" type="search" placeholder="Search for chords" aria-label="Search" autocomplete="off" autocapitalize="none" autocorrect="off">
           {% endif %}
-        <button class="btn btn-outline-success d-none d-md-block" type="submit">🔎</button>
+        <button class="btn btn-outline-success d-none d-md-block" type="submit" aria-label="Search">🔎</button>
       </form>
       <ul class="navbar-nav ms-2 md-4" style="flex-direction: row;">
         <li class="nav-item">
-          <a class="nav-link" href="/favs">
+          <a class="nav-link" href="/favs" role="button" tabindex="0" aria-label="Favorites">
             <span class="d-none d-md-inline">Favorites</span>
             <span class="d-inline d-md-none">Favs</span>
           </a>
         </li>
         <li class="nav-item ms-2 md-4">
-          <a class="nav-link" href="/about">
+          <a class="nav-link" href="/about" role="button" tabindex="0" aria-label="About">
             <span class="d-none d-md-inline">About</span>
           </a>
         </li>
         <li class="nav-item ms-2 md-4">
-          <a class="nav-link">
-            <span role="button" title="enable/disable dark mode" id="dark_mode">
+          <a class="nav-link" tabindex="0">
+            <span role="button" title="enable/disable dark mode" id="dark_mode" aria-label="Toggle dark mode">
               🌓︎
             </span></a>
         </li>
         <li class="nav-item ms-2 md-4">
-          <a id="fullscreen-btn" class="nav-link" onclick="toggleFullscreen()">
-            <span role="button" title="toggle fullscreen" id="fullscreen-icon">⛶</span>
+          <a id="fullscreen-btn" class="nav-link" onclick="toggleFullscreen()" tabindex="0">
+            <span role="button" title="toggle fullscreen" id="fullscreen-icon" aria-label="Toggle fullscreen">⛶</span>
           </a>
         </li>
         <li class="nav-item ms-2 md-4">
-          <a id="share-btn" class="nav-link" onclick="shareCurrentPage()">
-            <span role="button" title="share with connected devices" id="share-icon">↗️</span>
+          <a id="share-btn" class="nav-link" onclick="shareCurrentPage()" tabindex="0">
+            <span role="button" title="share with connected devices" id="share-icon" aria-label="Share page">↗️</span>
           </a>
         </li>
       </ul>

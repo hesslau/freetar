@@ -9,13 +9,15 @@
   column-rule: solid 1px #666;
   height: 100vh;
   overflow-y: auto;
-
   line-height: 1;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tab-block {
   margin: 1em 1em 0 0;
   padding: 1em;
+  touch-action: manipulation;
 }
 
 [data-bs-theme="light"] .tab-block {
@@ -45,4 +47,188 @@
 
 [data-bs-theme="dark"] .chord {
   color: gold;
+}
+
+/* Touch-friendly improvements */
+.nav-link {
+  min-height: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+[data-bs-theme="dark"] .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-brand {
+  font-size: 1.4em;
+  font-weight: bold;
+  padding: 0.75rem 1rem;
+}
+
+.btn {
+  min-height: 48px;
+  touch-action: manipulation;
+  padding: 0.75rem 1.25rem;
+  font-size: 1.1em;
+}
+
+.form-control {
+  min-height: 48px;
+  font-size: 16px; /* Prevents zoom on iOS */
+  padding: 0.75rem 1rem;
+}
+
+/* Navigation bar improvements */
+.navbar {
+  padding: 0.75rem 1rem;
+}
+
+.navbar-nav .nav-item {
+  margin-left: 0.5rem;
+}
+
+/* Top bar button icons - make them bigger */
+#dark_mode, #fullscreen-icon, #share-icon {
+  font-size: 1.3em;
+  display: inline-block;
+}
+
+/* Favorite star button - bigger and more touch-friendly */
+.favorite {
+  font-size: 1.8em;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  padding: 0.25em;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+.favorite:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+[data-bs-theme="dark"] .favorite:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  .tab {
+    padding: 0.5em;
+    column-count: 1;
+  }
+  
+  .tab-block {
+    margin: 0.5em 0;
+    padding: 0.75em;
+  }
+  
+  .chord {
+    font-size: 1.3em;
+    line-height: 1.4;
+  }
+  
+  .navbar {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Make favorite button even bigger on mobile */
+  .favorite {
+    font-size: 2.2em;
+    min-height: 50px;
+    min-width: 50px;
+  }
+  
+  /* Mobile top bar improvements */
+  .nav-link {
+    min-height: 52px;
+    min-width: 52px;
+    padding: 0.875rem 0.75rem;
+  }
+  
+  .navbar-brand {
+    font-size: 1.5em;
+    padding: 0.875rem 0.75rem;
+  }
+  
+  .btn {
+    min-height: 52px;
+    padding: 0.875rem 1rem;
+    font-size: 1.2em;
+  }
+  
+  .form-control {
+    min-height: 52px;
+    padding: 0.875rem 1rem;
+    font-size: 16px;
+  }
+  
+  /* Mobile navigation spacing */
+  .navbar-nav .nav-item {
+    margin-left: 0.25rem;
+  }
+  
+  /* Mobile icon sizing */
+  #dark_mode, #fullscreen-icon, #share-icon {
+    font-size: 1.5em;
+  }
+  
+  /* Reduce margins between nav items on mobile */
+  .navbar-nav {
+    gap: 0.25rem;
+  }
+}
+
+/* Improve touch scrolling */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Better tap highlights */
+.nav-link, .btn, [role="button"] {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+/* Prevent text selection on UI elements */
+.navbar, .nav-link, .btn {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 } 
+
+
+#results.table td {
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+#results.table tr:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
