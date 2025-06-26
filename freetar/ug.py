@@ -76,8 +76,7 @@ class SongDetail:
         tab = self.tab
 
         # remove lines that look like a guitar tab line
-        tab = re.sub(r"[a-zA-Z]\|.*\n?", "", tab, flags=re.MULTILINE) # filters `e|-1-2-3-`
-        tab = re.sub(r"[a-zA-Z]--.*\n?", "", tab, flags=re.MULTILINE) # filters `e|--1-2-3`
+        tab = re.sub(r"[a-zA-Z][\|\-\:].*\n?", "", tab, flags=re.MULTILINE) # filters `e|-1-2-3-` or `e:1-2-3-` or `e-1-2-3-`
 
         tab = tab.replace("\r\n", "<br/>")
         tab = tab.replace("\n", "<br/>")
