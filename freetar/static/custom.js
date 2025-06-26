@@ -230,3 +230,58 @@ document.querySelectorAll('.favorite').forEach(item => {
   })
 })
 
+// WebSocket connection
+let socket = null;
+
+function connectWebSocket() {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        const wsPort = window.location.port ? parseInt(window.location.port) + 1 : 22002;
+        socket = new WebSocket(`ws://${window.location.hostname}:${wsPort}`);
+        
+        socket.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'share_page') {
+                window.location.href = data.url;
+            }
+        };
+
+        socket.onclose = () => {
+            console.log('WebSocket disconnected');
+            // Try to reconnect after 5 seconds
+            setTimeout(connectWebSocket, 5000);
+        };
+    }
+}
+
+function shareCurrentPage() {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            type: 'share_page',
+            url: window.location.pathname
+        }));
+        // Show a brief notification
+        const shareIcon = document.getElementById('share-icon');
+        const originalText = shareIcon.textContent;
+        shareIcon.textContent = '✓';
+        setTimeout(() => {
+            shareIcon.textContent = originalText;
+        }, 2000);
+    } else {
+        console.error('WebSocket not connected');
+        // Show error state
+        const shareIcon = document.getElementById('share-icon');
+        const originalText = shareIcon.textContent;
+        shareIcon.textContent = '⚠️';
+        setTimeout(() => {
+            shareIcon.textContent = originalText;
+        }, 2000);
+    }
+}
+
+// Connect WebSocket when page loads
+document.addEventListener('DOMContentLoaded', connectWebSocket);
+
