@@ -94,14 +94,19 @@ function stopScrolling() {
 
 function colorize_favs() {
     // make every entry yellow if we faved it before
-    favorites = JSON.parse(localStorage.getItem("favorites")) || {};
-
-    $("#results tr").each(function () {
-        var tab_url = $(this).find(".song").find("a").attr("href");
-        if (favorites[tab_url] != undefined) {
-            $(this).find(".favorite").css("color", "#ffae00");
-        }
-    });
+    fetch('/favorites')
+        .then(response => response.json())
+        .then(favorites => {
+            $("#results tr").each(function () {
+                var tab_url = $(this).find(".song").find("a").attr("href");
+                if (tab_url && favorites[tab_url] != undefined) {
+                    $(this).find(".favorite").css("color", "#ffae00");
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading favorites:', error);
+        });
 }
 
 function initialise_transpose() {
@@ -207,26 +212,54 @@ $('#dark_mode').click(function(){
     }
 });
 
+// Update favorite click handler to use server-side storage
 document.querySelectorAll('.favorite').forEach(item => {
   item.addEventListener('click', event => {
-    favorites = JSON.parse(localStorage.getItem("favorites")) || {};
-    elm = event.target;
-    tab_url = elm.getAttribute('data-url')
-    if (tab_url in favorites) {
-        delete favorites[tab_url];
-        $(elm).css("color", "");
+    const elm = event.target;
+    const tab_url = elm.getAttribute('data-url');
+    
+    // Check if already favorited by checking current color
+    const isFavorited = $(elm).css("color") === "rgb(255, 174, 0)"; // #ffae00 in rgb
+    
+    if (isFavorited) {
+        // Remove from favorites
+        fetch('/favorites', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ tab_url: tab_url })
+        }).then(response => {
+            if (response.ok) {
+                $(elm).css("color", "");
+            }
+        }).catch(error => {
+            console.error('Error removing favorite:', error);
+        });
     } else {
-      const fav = {
-        artist_name: elm.getAttribute('data-artist'),
-        song: elm.getAttribute('data-song'),
-        type: elm.getAttribute('data-type'),
-        rating: elm.getAttribute('data-rating'),
-        tab_url: elm.getAttribute('data-url')
-      }
-      favorites[fav["tab_url"]] = fav;
-      $(elm).css("color", "#ffae00");
+        // Add to favorites
+        const fav = {
+            artist_name: elm.getAttribute('data-artist'),
+            song: elm.getAttribute('data-song'),
+            type: elm.getAttribute('data-type'),
+            rating: elm.getAttribute('data-rating'),
+            tab_url: tab_url
+        };
+        
+        fetch('/favorites', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(fav)
+        }).then(response => {
+            if (response.ok) {
+                $(elm).css("color", "#ffae00");
+            }
+        }).catch(error => {
+            console.error('Error adding favorite:', error);
+        });
     }
-    localStorage.setItem("favorites", JSON.stringify(favorites));
   })
 })
 

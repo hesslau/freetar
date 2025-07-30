@@ -1,5 +1,6 @@
 import waitress
 import os
+import json
 from flask import Flask, render_template, request, jsonify
 from flask_caching import Cache
 from flask_minify import Minify
@@ -26,6 +27,39 @@ _websocket_thread = None
 
 # Global variable to store the last shared song
 last_shared_song = None
+
+# Global variable to store shared favorites
+shared_favorites = {}
+
+# Favorites file path
+FAVORITES_FILE = "freetar_favorites.json"
+
+def load_favorites():
+    """Load favorites from JSON file"""
+    global shared_favorites
+    try:
+        if os.path.exists(FAVORITES_FILE):
+            with open(FAVORITES_FILE, 'r') as f:
+                shared_favorites = json.load(f)
+                print(f"Loaded {len(shared_favorites)} favorites from {FAVORITES_FILE}")
+        else:
+            shared_favorites = {}
+            print(f"No favorites file found, starting with empty favorites")
+    except Exception as e:
+        print(f"Error loading favorites: {e}")
+        shared_favorites = {}
+
+def save_favorites():
+    """Save favorites to JSON file"""
+    try:
+        with open(FAVORITES_FILE, 'w') as f:
+            json.dump(shared_favorites, f, indent=2)
+        print(f"Saved {len(shared_favorites)} favorites to {FAVORITES_FILE}")
+    except Exception as e:
+        print(f"Error saving favorites: {e}")
+
+# Load favorites from disk on startup
+load_favorites()
 
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -103,6 +137,44 @@ def set_live():
     data = request.get_json()
     if data and "url" in data:
         last_shared_song = data["url"]
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 400
+
+
+@app.route("/favorites", methods=["GET"])
+def get_favorites():
+    """Get all shared favorites"""
+    global shared_favorites
+    return jsonify(shared_favorites)
+
+
+@app.route("/favorites", methods=["POST"])
+def add_favorite():
+    """Add a song to shared favorites"""
+    global shared_favorites
+    data = request.get_json()
+    if data and "tab_url" in data:
+        fav = {
+            "artist_name": data.get("artist_name", ""),
+            "song": data.get("song", ""),
+            "type": data.get("type", ""),
+            "rating": data.get("rating", ""),
+            "tab_url": data["tab_url"]
+        }
+        shared_favorites[data["tab_url"]] = fav
+        save_favorites()  # Save to disk
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 400
+
+
+@app.route("/favorites", methods=["DELETE"])
+def remove_favorite():
+    """Remove a song from shared favorites"""
+    global shared_favorites
+    data = request.get_json()
+    if data and "tab_url" in data and data["tab_url"] in shared_favorites:
+        del shared_favorites[data["tab_url"]]
+        save_favorites()  # Save to disk
         return jsonify({"status": "success"})
     return jsonify({"status": "error"}), 400
 

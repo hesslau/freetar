@@ -61,30 +61,45 @@
 </details>
 
 <script>
-        favorites = JSON.parse(localStorage.getItem("favorites")) || {};
-
-        $.each(favorites, function (index, song) {
-            $('#results').append(
-                '<tr>' +
-                '<td>' + song.artist_name + '</td>' +
-                '<td class="song">' +
-                '<a href="' + song.tab_url + '">' + song.song + '</a>' +
-                '</td>' +
-                '<td>' + song.rating + '</td>' +
-                '<td>' + song.type + '</td>' +
-                '<td><span data-artist="'+song.artist_name+'" data-song="'+song.song+'" data-type="'+song.type+'" data-rating="'+song.rating+'" data-url="'+song.tab_url+'" class="favorite">★</span></td>' +
-                '</tr>');
-        });
+        // Load favorites from server
+        fetch('/favorites')
+            .then(response => response.json())
+            .then(favorites => {
+                $.each(favorites, function (index, song) {
+                    $('#results').append(
+                        '<tr>' +
+                        '<td>' + song.artist_name + '</td>' +
+                        '<td class="song">' +
+                        '<a href="' + song.tab_url + '">' + song.song + '</a>' +
+                        '</td>' +
+                        '<td>' + song.rating + '</td>' +
+                        '<td>' + song.type + '</td>' +
+                        '<td><span data-artist="'+song.artist_name+'" data-song="'+song.song+'" data-type="'+song.type+'" data-rating="'+song.rating+'" data-url="'+song.tab_url+'" class="favorite">★</span></td>' +
+                        '</tr>');
+                });
+                // Re-initialize event listeners for new favorites
+                initializeFavoriteListeners();
+            })
+            .catch(error => {
+                console.error('Error loading favorites:', error);
+            });
 
   function exportFavorites() {
-    const blob = new Blob([localStorage.getItem("favorites")], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "freetar-favorites.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    fetch('/favorites')
+        .then(response => response.json())
+        .then(favorites => {
+            const blob = new Blob([JSON.stringify(favorites)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "freetar-favorites.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            console.error('Error exporting favorites:', error);
+        });
   }
 
   function importFavorites(input) {
@@ -93,20 +108,55 @@
       const reader = new FileReader();
       reader.onload = function (e) {
         const content = e.target.result;
-        localStorage.setItem("favorites", content);
+        try {
+            const favorites = JSON.parse(content);
+            // Import each favorite to the server
+            const promises = Object.values(favorites).map(fav => 
+                fetch('/favorites', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(fav)
+                })
+            );
+            Promise.all(promises).then(() => {
+                location.reload();
+            });
+        } catch (error) {
+            console.error('Error importing favorites:', error);
+            alert('Error importing favorites. Please check the file format.');
+        }
       };
       reader.readAsText(file);
-      location.reload();
     }
+  }
+
+  function initializeFavoriteListeners() {
+    document.querySelectorAll('.favorite').forEach(item => {
+        // Remove existing listeners to avoid duplicates
+        item.replaceWith(item.cloneNode(true));
+    });
+    // Re-attach listeners (this will be handled by the main script)
   }
 </script>
 {% endif %}
 
 <script>
-    favorites_url = Object.keys(JSON.parse(localStorage.getItem("favorites")) || {});
-    for (const fav of [...document.getElementsByClassName('favorite')]) {
-      if (favorites_url.includes(fav.getAttribute('data-url').split("?")[0])) $(fav).css("color", "#ffae00");
-    } 
+    // Load favorites from server and colorize them
+    fetch('/favorites')
+        .then(response => response.json())
+        .then(favorites => {
+            const favorites_url = Object.keys(favorites);
+            for (const fav of [...document.getElementsByClassName('favorite')]) {
+                if (favorites_url.includes(fav.getAttribute('data-url').split("?")[0])) {
+                    $(fav).css("color", "#ffae00");
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading favorites:', error);
+        });
 
     // Add sorting to the table
     // taken from https://stackoverflow.com/a/70024272
