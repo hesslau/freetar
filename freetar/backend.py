@@ -28,11 +28,18 @@ _websocket_thread = None
 # Global variable to store the last shared song
 last_shared_song = None
 
+# Global variable to store recent shares (list of recent songs)
+recent_shares = []
+MAX_RECENT_SHARES = 100
+
 # Global variable to store shared favorites
 shared_favorites = {}
 
 # Favorites file path
 FAVORITES_FILE = "freetar_favorites.json"
+
+# Recent shares file path
+RECENT_SHARES_FILE = "freetar_recent_shares.json"
 
 def load_favorites():
     """Load favorites from JSON file"""
@@ -58,8 +65,35 @@ def save_favorites():
     except Exception as e:
         print(f"Error saving favorites: {e}")
 
+def load_recent_shares():
+    """Load recent shares from JSON file"""
+    global recent_shares
+    try:
+        if os.path.exists(RECENT_SHARES_FILE):
+            with open(RECENT_SHARES_FILE, 'r') as f:
+                recent_shares = json.load(f)
+                print(f"Loaded {len(recent_shares)} recent shares from {RECENT_SHARES_FILE}")
+        else:
+            recent_shares = []
+            print(f"No recent shares file found, starting with empty list")
+    except Exception as e:
+        print(f"Error loading recent shares: {e}")
+        recent_shares = []
+
+def save_recent_shares():
+    """Save recent shares to JSON file"""
+    try:
+        with open(RECENT_SHARES_FILE, 'w') as f:
+            json.dump(recent_shares, f, indent=2)
+        print(f"Saved {len(recent_shares)} recent shares to {RECENT_SHARES_FILE}")
+    except Exception as e:
+        print(f"Error saving recent shares: {e}")
+
 # Load favorites from disk on startup
 load_favorites()
+
+# Load recent shares from disk on startup
+load_recent_shares()
 
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -122,21 +156,55 @@ def show_favs():
 
 @app.route("/live", methods=["GET"])
 def get_live():
-    """Get the last shared song URL"""
-    global last_shared_song
-    if last_shared_song:
-        return jsonify({"url": last_shared_song})
+    """Get the recent shared songs"""
+    global recent_shares
+    if recent_shares:
+        return jsonify({"shares": recent_shares})
     else:
-        return jsonify({"url": None}), 404
+        return jsonify({"shares": []}), 404
 
 
 @app.route("/live", methods=["POST"])
 def set_live():
-    """Set the last shared song URL"""
-    global last_shared_song
+    """Add a song to recent shares"""
+    global recent_shares
     data = request.get_json()
     if data and "url" in data:
-        last_shared_song = data["url"]
+        from datetime import datetime
+        import urllib.parse
+        
+        # Extract artist and song from URL
+        url = data["url"]
+        artist_name = "Unknown Artist"
+        song_name = "Unknown Song"
+        
+        # Parse URL to extract artist and song (format: /tab/artist/song)
+        url_parts = url.strip('/').split('/')
+        if len(url_parts) >= 3 and url_parts[0] == 'tab':
+            try:
+                artist_name = urllib.parse.unquote(url_parts[1]).replace('-', ' ').replace('_', ' ')
+                song_name = urllib.parse.unquote(url_parts[2]).replace('-', ' ').replace('_', ' ')
+            except Exception as e:
+                print(f"Error parsing URL {url}: {e}")
+        
+        # Remove if already exists to avoid duplicates
+        recent_shares = [share for share in recent_shares if share["url"] != url]
+        
+        # Add new share at the beginning with current timestamp and parsed names
+        new_share = {
+            "url": url,
+            "artist_name": artist_name,
+            "song_name": song_name,
+            "timestamp": datetime.now().isoformat()
+        }
+        recent_shares.insert(0, new_share)
+        
+        # Keep only the most recent shares
+        recent_shares = recent_shares[:MAX_RECENT_SHARES]
+        
+        # Save to disk
+        save_recent_shares()
+        
         return jsonify({"status": "success"})
     return jsonify({"status": "error"}), 400
 
