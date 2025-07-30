@@ -97,12 +97,14 @@
             <small>Fullscreen</small>
           </a>
         </li>
+        {% if request.path.startswith('/tab/') %}
         <li class="nav-item">
           <a id="share-btn" class="nav-link" onclick="shareCurrentPage()" tabindex="0" style="display: flex; flex-direction: column; align-items: center;">
             <div role="button" title="share with connected devices" id="share-icon" aria-label="Share page">📤</div>
             <small>Share</small>
           </a>
         </li>
+        {% endif %}
       </ul>
     </div>
   </nav>
