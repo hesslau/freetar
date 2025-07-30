@@ -266,6 +266,9 @@ function shareCurrentPage() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ url: window.location.pathname })
+        }).then(() => {
+            // Refresh the live banner after sharing
+            loadLiveBanner();
         });
         
         socket.send(JSON.stringify({
@@ -320,6 +323,54 @@ function goToLive() {
         });
 }
 
+function loadLiveBanner() {
+    fetch('/live')
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('No live song');
+            }
+        })
+        .then(data => {
+            if (data.url) {
+                showLiveBanner(data.url);
+            } else {
+                hideLiveBanner();
+            }
+        })
+        .catch(error => {
+            hideLiveBanner();
+        });
+}
+
+function showLiveBanner(url) {
+    const banner = document.getElementById('live-banner');
+    const link = document.getElementById('live-banner-link');
+    
+    // Extract song info from URL (format: /tab/artist/song)
+    const pathParts = url.split('/');
+    let songText = 'Unknown Song';
+    
+    if (pathParts.length >= 4 && pathParts[1] === 'tab') {
+        const artist = decodeURIComponent(pathParts[2]).replace(/[-_]/g, ' ');
+        const song = decodeURIComponent(pathParts[3]).replace(/[-_]/g, ' ');
+        songText = `${artist} - ${song}`;
+    }
+    
+    link.href = url;
+    link.textContent = songText;
+    banner.classList.remove('d-none');
+}
+
+function hideLiveBanner() {
+    const banner = document.getElementById('live-banner');
+    banner.classList.add('d-none');
+}
+
 // Connect WebSocket when page loads
-document.addEventListener('DOMContentLoaded', connectWebSocket);
+document.addEventListener('DOMContentLoaded', function() {
+    connectWebSocket();
+    loadLiveBanner();
+});
 
