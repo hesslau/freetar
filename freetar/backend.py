@@ -1,6 +1,6 @@
 import waitress
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask_caching import Cache
 from flask_minify import Minify
 import asyncio
@@ -23,6 +23,9 @@ Minify(app=app, html=True, js=True, cssless=True)
 # Global variable to track WebSocket server
 _websocket_server = None
 _websocket_thread = None
+
+# Global variable to store the last shared song
+last_shared_song = None
 
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -81,6 +84,27 @@ def show_favs():
     return render_template("index.html",
                            title="Freetar - Favorites",
                            favs=True)
+
+
+@app.route("/live", methods=["GET"])
+def get_live():
+    """Get the last shared song URL"""
+    global last_shared_song
+    if last_shared_song:
+        return jsonify({"url": last_shared_song})
+    else:
+        return jsonify({"url": None}), 404
+
+
+@app.route("/live", methods=["POST"])
+def set_live():
+    """Set the last shared song URL"""
+    global last_shared_song
+    data = request.get_json()
+    if data and "url" in data:
+        last_shared_song = data["url"]
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 400
 
 
 @app.route("/about")

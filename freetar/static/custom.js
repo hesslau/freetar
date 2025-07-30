@@ -259,6 +259,15 @@ function connectWebSocket() {
 
 function shareCurrentPage() {
     if (socket && socket.readyState === WebSocket.OPEN) {
+        // Store the current URL on the server as the last shared song
+        fetch('/live', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: window.location.pathname })
+        });
+        
         socket.send(JSON.stringify({
             type: 'share_page',
             url: window.location.pathname
@@ -280,6 +289,35 @@ function shareCurrentPage() {
             shareIcon.textContent = originalText;
         }, 2000);
     }
+}
+
+function goToLive() {
+    // Get the last shared song from the server
+    fetch('/live')
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('No song shared yet');
+            }
+        })
+        .then(data => {
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error('No song shared yet');
+            }
+        })
+        .catch(error => {
+            // Show notification if no song has been shared yet
+            const liveBtn = document.getElementById('live-btn');
+            const liveIcon = liveBtn.querySelector('div');
+            const originalText = liveIcon.textContent;
+            liveIcon.textContent = '❌';
+            setTimeout(() => {
+                liveIcon.textContent = originalText;
+            }, 2000);
+        });
 }
 
 // Connect WebSocket when page loads
