@@ -500,8 +500,12 @@ function loadLiveBanner() {
         })
         .then(data => {
             if (data.shares && data.shares.length > 0) {
-                // Show the most recent share in the banner
-                showLiveBanner(data.shares[0].url, data.shares[0]);
+                // Only show banner if backend indicates it should be shown (within 5 minutes)
+                if (data.show_banner) {
+                    showLiveBanner(data.shares[0].url, data.shares[0]);
+                } else {
+                    hideLiveBanner();
+                }
             } else {
                 hideLiveBanner();
             }
@@ -510,6 +514,9 @@ function loadLiveBanner() {
             hideLiveBanner();
         });
 }
+
+// Global variable to track banner timeout
+let bannerTimeout = null;
 
 function showLiveBanner(url, share_data = null) {
     const banner = document.getElementById('live-banner');
@@ -533,11 +540,41 @@ function showLiveBanner(url, share_data = null) {
     link.href = url;
     link.textContent = songText;
     banner.classList.remove('d-none');
+    
+    // Clear any existing timeout
+    if (bannerTimeout) {
+        clearTimeout(bannerTimeout);
+    }
+    
+    // Set timeout to hide banner after 5 minutes (if share_data has timestamp)
+    if (share_data && share_data.timestamp) {
+        try {
+            const shareTime = new Date(share_data.timestamp);
+            const now = new Date();
+            const elapsed = now - shareTime;
+            const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+            
+            if (elapsed < fiveMinutes) {
+                const remaining = fiveMinutes - elapsed;
+                bannerTimeout = setTimeout(() => {
+                    hideLiveBanner();
+                }, remaining);
+            }
+        } catch (e) {
+            console.error('Error calculating banner timeout:', e);
+        }
+    }
 }
 
 function hideLiveBanner() {
     const banner = document.getElementById('live-banner');
     banner.classList.add('d-none');
+    
+    // Clear timeout when manually hiding
+    if (bannerTimeout) {
+        clearTimeout(bannerTimeout);
+        bannerTimeout = null;
+    }
 }
 
 // Connect WebSocket when page loads

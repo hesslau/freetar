@@ -159,7 +159,23 @@ def get_live():
     """Get the recent shared songs"""
     global recent_shares
     if recent_shares:
-        return jsonify({"shares": recent_shares})
+        from datetime import datetime, timedelta
+        
+        # Check if the most recent share is within 5 minutes
+        try:
+            most_recent = recent_shares[0]
+            share_time = datetime.fromisoformat(most_recent["timestamp"])
+            current_time = datetime.now()
+            time_diff = current_time - share_time
+            
+            # Only show banner if most recent share is within 5 minutes
+            if time_diff <= timedelta(minutes=5):
+                return jsonify({"shares": recent_shares, "show_banner": True})
+            else:
+                return jsonify({"shares": recent_shares, "show_banner": False})
+        except Exception as e:
+            print(f"Error checking timestamp: {e}")
+            return jsonify({"shares": recent_shares, "show_banner": False})
     else:
         return jsonify({"shares": []}), 404
 
