@@ -4,7 +4,7 @@
 {% block content %}
   
   <div class="col-sm col-md-12 col-lg-12 col-12">
-      <h5>
+      <h5 id="song-title" data-artist="{{ tab.artist_name }}" data-song="{{ tab.song_name }}">
           <a href="/search?search_term={{ tab.artist_name }}">{{ tab.artist_name }}</a> - {{ tab.song_name }} (ver {{tab.version }})
           <span title="add/remove song to/from favs" class="favorite m-2 d-print-none" data-artist="{{tab.artist_name}}" data-song="{{tab.song_name}}" data-type="{{tab._type}}" data-rating="{{tab.rating}}" data-url="{{ request.path }}">★</span>
       </h5>

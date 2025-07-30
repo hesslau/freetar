@@ -171,26 +171,27 @@ def set_live():
     data = request.get_json()
     if data and "url" in data:
         from datetime import datetime
-        import urllib.parse
         
-        # Extract artist and song from URL
+        # Use provided artist and song names, with URL parsing as fallback
         url = data["url"]
-        artist_name = "Unknown Artist"
-        song_name = "Unknown Song"
+        artist_name = data.get("artist_name", "Unknown Artist")
+        song_name = data.get("song_name", "Unknown Song")
         
-        # Parse URL to extract artist and song (format: /tab/artist/song)
-        url_parts = url.strip('/').split('/')
-        if len(url_parts) >= 3 and url_parts[0] == 'tab':
-            try:
-                artist_name = urllib.parse.unquote(url_parts[1]).replace('-', ' ').replace('_', ' ')
-                song_name = urllib.parse.unquote(url_parts[2]).replace('-', ' ').replace('_', ' ')
-            except Exception as e:
-                print(f"Error parsing URL {url}: {e}")
+        # If names weren't provided, try to parse from URL as fallback
+        if artist_name == "Unknown Artist" and song_name == "Unknown Song":
+            import urllib.parse
+            url_parts = url.strip('/').split('/')
+            if len(url_parts) >= 3 and url_parts[0] == 'tab':
+                try:
+                    artist_name = urllib.parse.unquote(url_parts[1]).replace('-', ' ').replace('_', ' ')
+                    song_name = urllib.parse.unquote(url_parts[2]).replace('-', ' ').replace('_', ' ')
+                except Exception as e:
+                    print(f"Error parsing URL {url}: {e}")
         
         # Remove if already exists to avoid duplicates
         recent_shares = [share for share in recent_shares if share["url"] != url]
         
-        # Add new share at the beginning with current timestamp and parsed names
+        # Add new share at the beginning with current timestamp and names
         new_share = {
             "url": url,
             "artist_name": artist_name,

@@ -292,13 +292,27 @@ function connectWebSocket() {
 
 function shareCurrentPage() {
     if (socket && socket.readyState === WebSocket.OPEN) {
-        // Store the current URL on the server as the last shared song
+        // Try to get artist and song from the favorite star element on the page
+        let artist_name = "Unknown Artist";
+        let song_name = "Unknown Song";
+        
+        const favoriteElement = document.querySelector('.favorite[data-artist][data-song]');
+        if (favoriteElement) {
+            artist_name = favoriteElement.getAttribute('data-artist') || "Unknown Artist";
+            song_name = favoriteElement.getAttribute('data-song') || "Unknown Song";
+        }
+        
+        // Store the current URL on the server as the last shared song with metadata
         fetch('/live', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ url: window.location.pathname })
+            body: JSON.stringify({ 
+                url: window.location.pathname,
+                artist_name: artist_name,
+                song_name: song_name
+            })
         }).then(() => {
             // Refresh the live banner after sharing
             loadLiveBanner();
