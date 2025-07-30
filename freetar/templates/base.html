@@ -58,62 +58,43 @@
 
   <nav class="mb-2 navbar navbar-expand-lg bg-body-tertiary d-print-none">
     <div class="container">
-      <!-- First row: Brand and search -->
+      <!-- First row: Search only -->
       <div class="d-flex w-100" style="flex-wrap: nowrap;">
-        <a class="navbar-brand d-none d-md-block" href="/" role="button" tabindex="0">V</a>
+        <a href="/" class="navbar-brand me-2" style="text-decoration: none;">🌈🎹</a>
         <form class="d-flex flex-grow-1" method="GET" action="/search">
             {% if search_term %}
               <input required class="form-control me-2" name="search_term" type="search" value="{{ search_term }}" aria-label="Search" autocomplete="off" autocapitalize="none" autocorrect="off">
             {% else %}
               <input required class="form-control me-2" name="search_term" type="search" placeholder="Search for chords" aria-label="Search" autocomplete="off" autocapitalize="none" autocorrect="off">
             {% endif %}
-          <button class="btn btn-outline-success" type="submit" aria-label="Search">🔎</button>
+          <button class="btn btn-outline-success" type="submit" aria-label="Search">Search</button>
         </form>
       </div>
       
-      <!-- Second row: Navigation icons (mobile) -->
-      <div class="d-flex d-md-none w-100 justify-content-around mt-2">
-        <a class="nav-link px-1" href="/" role="button" tabindex="0" aria-label="Home">V</a>
-        <a class="nav-link px-1" href="/favs" role="button" tabindex="0" aria-label="Favorites">Favs</a>
-        <a class="nav-link px-1" href="/about" role="button" tabindex="0" aria-label="About">About</a>
-        <a class="nav-link px-1" tabindex="0">
-          <span role="button" title="enable/disable dark mode" id="dark_mode" aria-label="Toggle dark mode">🌓︎</span>
-        </a>
-        <a id="fullscreen-btn" class="nav-link px-1" onclick="toggleFullscreen()" tabindex="0">
-          <span role="button" title="toggle fullscreen" id="fullscreen-icon" aria-label="Toggle fullscreen">⛶</span>
-        </a>
-        <a id="share-btn" class="nav-link px-1" onclick="shareCurrentPage()" tabindex="0">
-          <span role="button" title="share with connected devices" id="share-icon" aria-label="Share page">↗️</span>
-        </a>
-      </div>
-      
-      <!-- Desktop navigation (hidden on mobile) -->
-      <ul class="navbar-nav ms-2 md-4 d-none d-md-flex" style="flex-direction: row;">
+      <!-- Navigation items -->
+      <ul class="navbar-nav d-flex flex-row justify-content-around w-100 mt-2" style="flex-wrap: wrap;">
         <li class="nav-item">
-          <a class="nav-link" href="/favs" role="button" tabindex="0" aria-label="Favorites">
-            <span class="d-none d-md-inline">Favorites</span>
-            <span class="d-inline d-md-none">Favs</span>
+          <a class="nav-link" href="/favs" role="button" tabindex="0" aria-label="Favorites" style="display: flex; flex-direction: column; align-items: center;">
+            <div>⭐</div>
+            <small>Favorites</small>
           </a>
         </li>
-        <li class="nav-item ms-2 md-4">
-          <a class="nav-link" href="/about" role="button" tabindex="0" aria-label="About">
-            <span class="d-none d-md-inline">About</span>
+        <li class="nav-item">
+          <a class="nav-link" tabindex="0" style="display: flex; flex-direction: column; align-items: center;">
+            <div role="button" title="enable/disable dark mode" id="dark_mode" aria-label="Toggle dark mode">🌓</div>
+            <small>Dark Mode</small>
           </a>
         </li>
-        <li class="nav-item ms-2 md-4">
-          <a class="nav-link" tabindex="0">
-            <span role="button" title="enable/disable dark mode" id="dark_mode" aria-label="Toggle dark mode">
-              🌓︎
-            </span></a>
-        </li>
-        <li class="nav-item ms-2 md-4">
-          <a id="fullscreen-btn" class="nav-link" onclick="toggleFullscreen()" tabindex="0">
-            <span role="button" title="toggle fullscreen" id="fullscreen-icon" aria-label="Toggle fullscreen">⛶</span>
+        <li class="nav-item">
+          <a id="fullscreen-btn" class="nav-link" onclick="toggleFullscreen()" tabindex="0" style="display: flex; flex-direction: column; align-items: center;">
+            <div role="button" title="toggle fullscreen" id="fullscreen-icon" aria-label="Toggle fullscreen">⛶</div>
+            <small>Fullscreen</small>
           </a>
         </li>
-        <li class="nav-item ms-2 md-4">
-          <a id="share-btn" class="nav-link" onclick="shareCurrentPage()" tabindex="0">
-            <span role="button" title="share with connected devices" id="share-icon" aria-label="Share page">↗️</span>
+        <li class="nav-item">
+          <a id="share-btn" class="nav-link" onclick="shareCurrentPage()" tabindex="0" style="display: flex; flex-direction: column; align-items: center;">
+            <div role="button" title="share with connected devices" id="share-icon" aria-label="Share page">📤</div>
+            <small>Share</small>
           </a>
         </li>
       </ul>
