@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="col-12">
+    <h3>🎵 Live Session</h3>
+    
+    {% if live_session_active %}
+        <div class="alert alert-success">
+            <strong>Live session is active!</strong> Songs have been shared in the past 20 minutes.
+        </div>
+        
+        {% if recent_shares %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Artist</th>
+                            <th scope="col">Song</th>
+                            <th scope="col">Shared</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for share in recent_shares %}
+                        <tr>
+                            <td><strong>{{ share.artist_name or "Unknown Artist" }}</strong></td>
+                            <td>{{ share.song_name or "Unknown Song" }}</td>
+                            <td>
+                                <small class="text-muted">
+                                    <script>
+                                        document.write(formatTimeAgo('{{ share.timestamp }}'));
+                                    </script>
+                                </small>
+                            </td>
+                            <td>
+                                <a href="{{ share.url }}" class="btn btn-sm btn-primary">View Tab</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        
+    {% else %}
+        <div class="alert alert-info text-center">
+            <h5>📭 No Live Session Running</h5>
+            <p>There doesn't seem to be a live session running right now.</p>
+            <p class="mb-0"><small class="text-muted">No songs have been shared in the past 20 minutes.</small></p>
+        </div>
+        
+        {% if recent_shares %}
+            <div class="mt-4">
+                <h5>📋 Previous Activity</h5>
+                <p class="text-muted">Here are some songs that were shared earlier:</p>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Artist</th>
+                                <th scope="col">Song</th>
+                                <th scope="col">Shared</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for share in recent_shares[:5] %}
+                            <tr>
+                                <td>{{ share.artist_name or "Unknown Artist" }}</td>
+                                <td>{{ share.song_name or "Unknown Song" }}</td>
+                                <td>
+                                    <small class="text-muted">
+                                        <script>
+                                            document.write(formatTimeAgo('{{ share.timestamp }}'));
+                                        </script>
+                                    </small>
+                                </td>
+                                <td>
+                                    <a href="{{ share.url }}" class="btn btn-sm btn-outline-primary">View Tab</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<script>
+function formatTimeAgo(timestamp) {
+    try {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) {
+            return 'Just now';
+        } else if (diffMins < 60) {
+            return `${diffMins}m ago`;
+        } else if (diffHours < 24) {
+            return `${diffHours}h ago`;
+        } else if (diffDays < 7) {
+            return `${diffDays}d ago`;
+        } else {
+            return date.toLocaleDateString();
+        }
+    } catch (e) {
+        return 'Unknown time';
+    }
+}
+</script>
+
+{% endblock %} 
