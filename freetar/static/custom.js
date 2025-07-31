@@ -269,7 +269,8 @@ let socket = null;
 function connectWebSocket() {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
         const wsPort = window.location.port ? parseInt(window.location.port) + 1 : 22002;
-        socket = new WebSocket(`ws://${window.location.hostname}:${wsPort}`);
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        socket = new WebSocket(`${protocol}//${window.location.hostname}:${wsPort}`);
         
         socket.onopen = () => {
             console.log('WebSocket connected');
