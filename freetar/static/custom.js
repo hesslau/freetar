@@ -303,7 +303,7 @@ function shareCurrentPage() {
         }
         
         // Store the current URL on the server as the last shared song with metadata
-        fetch('/live', {
+        fetch('/api/live', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -343,7 +343,7 @@ function shareCurrentPage() {
 
 function showRecentShares() {
     // Get recent shares from the server
-    fetch('/live')
+    fetch('/api/live')
         .then(response => {
             if (response.ok) {
                 return response.json();
@@ -490,7 +490,7 @@ function closeRecentSharesModal() {
 }
 
 function loadLiveBanner() {
-    fetch('/live')
+    fetch('/api/live')
         .then(response => {
             if (response.ok) {
                 return response.json();
@@ -500,9 +500,13 @@ function loadLiveBanner() {
         })
         .then(data => {
             if (data.shares && data.shares.length > 0) {
+                const mostRecentShare = data.shares[0];
+                const currentPath = window.location.pathname;
+                
                 // Only show banner if backend indicates it should be shown (within 5 minutes)
-                if (data.show_banner) {
-                    showLiveBanner(data.shares[0].url, data.shares[0]);
+                // AND the user is not currently on the same song page
+                if (data.show_banner && mostRecentShare.url !== currentPath) {
+                    showLiveBanner(mostRecentShare.url, mostRecentShare);
                 } else {
                     hideLiveBanner();
                 }

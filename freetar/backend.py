@@ -154,7 +154,43 @@ def show_favs():
                            favs=True)
 
 
-@app.route("/live", methods=["GET"])
+@app.route("/live")
+def show_live():
+    """Show the live session page with recent shares"""
+    global recent_shares
+    
+    # Check if there's been activity in the past 20 minutes
+    live_session_active = False
+    filtered_shares = []
+    
+    if recent_shares:
+        from datetime import datetime, timedelta
+        current_time = datetime.now()
+        twenty_minutes_ago = current_time - timedelta(minutes=20)
+        
+        try:
+            most_recent = recent_shares[0]
+            most_recent_time = datetime.fromisoformat(most_recent["timestamp"])
+            
+            if most_recent_time >= twenty_minutes_ago:
+                live_session_active = True
+                
+            # Filter shares to only show those from the past 20 minutes
+            for share in recent_shares:
+                share_time = datetime.fromisoformat(share["timestamp"])
+                if share_time >= twenty_minutes_ago:
+                    filtered_shares.append(share)
+                    
+        except Exception as e:
+            print(f"Error checking live session activity: {e}")
+    
+    return render_template("live.html",
+                           title="Freetar - Live Session",
+                           live_session_active=live_session_active,
+                           recent_shares=filtered_shares)
+
+
+@app.route("/api/live", methods=["GET"])
 def get_live():
     """Get the recent shared songs"""
     global recent_shares
@@ -180,7 +216,7 @@ def get_live():
         return jsonify({"shares": []}), 404
 
 
-@app.route("/live", methods=["POST"])
+@app.route("/api/live", methods=["POST"])
 def set_live():
     """Add a song to recent shares"""
     global recent_shares
