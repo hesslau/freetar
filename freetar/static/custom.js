@@ -278,7 +278,8 @@ function connectWebSocket() {
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'share_page') {
-                window.location.href = data.url;
+                // Show a notification banner instead of immediately navigating
+                showShareNotification(data.url);
             }
         };
 
@@ -339,6 +340,69 @@ function shareCurrentPage() {
             shareIcon.textContent = originalText;
         }, 2000);
     }
+}
+
+function showShareNotification(url) {
+    // Extract song info from URL for the notification
+    const pathParts = url.split('/');
+    let songText = 'Unknown Song';
+    
+    if (pathParts.length >= 4 && pathParts[1] === 'tab') {
+        const artist = decodeURIComponent(pathParts[2]).replace(/[-_]/g, ' ');
+        const song = decodeURIComponent(pathParts[3]).replace(/[-_]/g, ' ');
+        songText = `${artist} - ${song}`;
+    }
+    
+    // Create notification banner
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        background: #28a745; color: white; padding: 15px 20px;
+        border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        max-width: 350px; cursor: pointer;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    notification.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">🎵 New Song Shared!</div>
+        <div style="font-size: 0.9em;">${songText}</div>
+        <div style="font-size: 0.8em; margin-top: 5px; opacity: 0.9;">Click to view</div>
+    `;
+    
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Click to navigate
+    notification.addEventListener('click', () => {
+        window.location.href = url;
+    });
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
+    
+    // Also refresh the live banner
+    loadLiveBanner();
 }
 
 function showRecentShares() {
