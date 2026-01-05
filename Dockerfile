@@ -13,8 +13,9 @@ ENV PYTHONUNBUFFERED=TRUE
 RUN apk add --no-cache bash curl coreutils
 
 COPY --from=builder /app/dist/*.whl .
-RUN adduser -D freetar && \
-    pip install *.whl && \
+RUN adduser -D freetar
+WORKDIR /data
+RUN pip install *.whl && \
     rm *.whl
 
 USER freetar
