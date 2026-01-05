@@ -10,6 +10,8 @@ RUN poetry build --format=wheel
 FROM python:3.12-alpine3.20
 ENV PYTHONUNBUFFERED=TRUE
 
+RUN apk add --no-cache bash curl coreutils
+
 COPY --from=builder /app/dist/*.whl .
 RUN adduser -D freetar && \
     pip install *.whl && \
