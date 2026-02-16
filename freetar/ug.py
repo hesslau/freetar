@@ -1,3 +1,4 @@
+import cloudscraper
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import quote, urlparse
@@ -6,6 +7,8 @@ import re
 
 from dataclasses import dataclass, field
 from .utils import FreetarError
+
+scraper = cloudscraper.create_scraper()
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.3"
 
@@ -113,8 +116,8 @@ class Search:
 
     def __init__(self, value: str, page: int):
         try:
-            resp = requests.get(f"https://www.ultimate-guitar.com/search.php?page={page}&search_type=title&value={quote(value)}",
-                                headers={'User-Agent': USER_AGENT})
+            resp = scraper.get(f"http://www.ultimate-guitar.com/search.php?page={page}&search_type=title&value={quote(value)}",
+                               headers={'User-Agent': USER_AGENT})
             resp.raise_for_status()
             bs = BeautifulSoup(resp.text, 'html.parser') # data can be None
             data = bs.find("div", {"class": "js-store"}) # KeyError
@@ -197,8 +200,8 @@ def get_chords(s: SongDetail) -> SongDetail:
 
 def ug_tab(url_path: str):
     try:
-        resp = requests.get("https://tabs.ultimate-guitar.com/tab/" + url_path,
-                            headers={'User-Agent': USER_AGENT})
+        resp = scraper.get("https://tabs.ultimate-guitar.com/tab/" + url_path,
+                           headers={'User-Agent': USER_AGENT})
         resp.raise_for_status()
         bs = BeautifulSoup(resp.text, 'html.parser')
         data = bs.find("div", {"class": "js-store"})

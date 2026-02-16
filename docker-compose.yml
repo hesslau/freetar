@@ -1,0 +1,25 @@
+version: '3.8'
+
+networks:
+  npm_network:
+    external: true
+
+services:
+  freetar:
+    build:
+      context: "./"
+    ports:
+      - "22000:22001"
+      - "22002:22002"
+    environment:
+      - VIRTUAL_HOST=freetar.local
+      - VIRTUAL_PORT=22000
+    networks:
+      - npm_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:22001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s 
