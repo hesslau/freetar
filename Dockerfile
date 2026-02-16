@@ -13,7 +13,6 @@ ENV PYTHONUNBUFFERED=TRUE
 COPY --from=builder /app/dist/*.whl .
 RUN apk add --no-cache bash && \
     adduser -D freetar && \
-    mkdir -p /app/data && chown freetar:freetar /app/data && \
     pip install *.whl && \
     rm *.whl
 
