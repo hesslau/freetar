@@ -35,11 +35,11 @@ MAX_RECENT_SHARES = 100
 # Global variable to store shared favorites
 shared_favorites = {}
 
-# Favorites file path
-FAVORITES_FILE = "freetar_favorites.json"
-
-# Recent shares file path
-RECENT_SHARES_FILE = "freetar_recent_shares.json"
+# Data file paths — stored in ./data relative to working directory
+DATA_DIR = os.path.join(".", "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+FAVORITES_FILE = os.path.join(DATA_DIR, "freetar_favorites.json")
+RECENT_SHARES_FILE = os.path.join(DATA_DIR, "freetar_recent_shares.json")
 
 def load_favorites():
     """Load favorites from JSON file"""

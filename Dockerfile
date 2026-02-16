@@ -11,11 +11,14 @@ FROM python:3.12-alpine3.20
 ENV PYTHONUNBUFFERED=TRUE
 
 COPY --from=builder /app/dist/*.whl .
-RUN adduser -D freetar && \
+RUN apk add --no-cache bash && \
+    adduser -D freetar && \
+    mkdir -p /app/data && chown freetar:freetar /app/data && \
     pip install *.whl && \
     rm *.whl
 
 USER freetar
+WORKDIR /app
 EXPOSE 22000
 
 ENTRYPOINT ["/usr/local/bin/freetar"]
